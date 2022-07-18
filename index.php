@@ -31,7 +31,7 @@
                 }],
             },
             options: {
-                responsive: false,
+                responsive: true, // Adjust this later
                 title: {
                     display: true,
                     text: 'Medições de temperatura e umidade'
@@ -76,7 +76,7 @@
                 }],
             },
             options: {
-                responsive: false,
+                responsive: true, // Adjust this later
                 title: {
                     display: true,
                     text: 'Medições de umidade'
