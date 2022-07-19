@@ -162,14 +162,12 @@
         function MessageArrived(message) {
           if (listCounter < 30) { return ; }
 
-          var date = new Date()
-          writeChart(message.payloadString, date);
-
+          writeChart(message.payloadString);
           listCounter = 0;
           tempChart.update(), umidChart.update();
         }
 
-        function writeChart(msg, date) {
+        function writeChart(msg) {
           var data = msg.split("$");
           data[2] = new Date(data[2] * 1000).toLocaleString("pt-BR", {timeZone: "America/Sao_Paulo"})
           console.log("data: ", data);
