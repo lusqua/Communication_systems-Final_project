@@ -155,19 +155,28 @@
           }
         }
 
+        var listCounter = [0,0];
+        setInterval(function () {
+            listCounter[0]++;
+            listCounter[1]++;
+        }, 1000);
+
         /*Callback for incoming message processing */
         function MessageArrived(message) {
           var type = message.destinationName.split("/")[1] == "temperature" ? 0 : 1
           var date = new Date()
 
+          if (listCounter[type] < 30) { return ; }
+
           configList[type].data.labels.push(`${date.getHours()}:${date.getMinutes()}`);
           configList[type].data.datasets[0].data.push(message.payloadString);
 
-          if(configList[type].data.datasets.length > 20) {
-            configList[type].data.datasets.shift()
+          if(configList[type].data.datasets[0].data.length > 20) {
+            configList[type].data.datasets[0].data.shift()
             configList[type].data.labels.shift()
           }
 
+          listCounter[type] = 0;
           type == 0 ? tempChart.update() : umidChart.update();
         }
     });
