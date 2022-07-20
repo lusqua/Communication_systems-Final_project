@@ -114,7 +114,7 @@
         const umidContext = document.getElementById('Umidchart').getContext('2d');
         const umidChart = new Chart(umidContext, configUmid);
 
-        const configList = [configTemp, configUmid]
+        const configList = [configUmid, configTemp]
 
         var hostname = "broker.hivemq.com";
         var port = 8000;
@@ -137,9 +137,7 @@
         /*Callback for successful MQTT connection */
         function Connected() {
           console.log("Connected");
-          mqttClient.subscribe("JjQZFhodDDghISIALBYQNS8/temperature");
-          mqttClient.subscribe("JjQZFhodDDghISIALBYQNS8/humidity");
-
+          mqttClient.subscribe("JjQZFhodDDghISIALBYQNS8/SCO");
         }
 
         /*Callback for failed connection*/
@@ -155,29 +153,34 @@
           }
         }
 
-        var listCounter = [0,0];
+        var listCounter = 30;
         setInterval(function () {
-            listCounter[0]++;
-            listCounter[1]++;
+            listCounter++;
         }, 1000);
 
         /*Callback for incoming message processing */
         function MessageArrived(message) {
-          var type = message.destinationName.split("/")[1] == "temperature" ? 0 : 1
-          var date = new Date()
+          if (listCounter < 30) { return ; }
 
-          if (listCounter[type] < 30) { return ; }
+          writeChart(message.payloadString);
+          listCounter = 0;
+          tempChart.update(), umidChart.update();
+        }
 
-          configList[type].data.labels.push(`${date.getHours()}:${date.getMinutes()}`);
-          configList[type].data.datasets[0].data.push(message.payloadString);
+        function writeChart(msg) {
+          var data = msg.split("$");
+          data[2] = new Date(data[2] * 1000).toLocaleString("pt-BR", {timeZone: "America/Sao_Paulo"})
+          console.log("data: ", data);
 
-          if(configList[type].data.datasets[0].data.length > 20) {
-            configList[type].data.datasets[0].data.shift()
-            configList[type].data.labels.shift()
+          for(let i=0 ; i<2 ; i++) {
+            configList[i].data.labels.push(`${data[2].split(" ")[1]}`); // date.getHours()}:${date.getMinutes()
+            configList[i].data.datasets[0].data.push(data[i]);
+
+            if(configList[i].data.datasets[0].data.length > 20) {
+              configList[i].data.datasets[0].data.shift()
+              configList[i].data.labels.shift()
+            }
           }
-
-          listCounter[type] = 0;
-          type == 0 ? tempChart.update() : umidChart.update();
         }
     });
   </script>
